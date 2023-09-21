@@ -32,9 +32,6 @@ public class Warehouse implements FileInteraction {
 
     public Warehouse(ProductList productList) {
         this.productList = productList;
-    }
-
-    public Warehouse() {
         importReceipt = new ArrayList<>();
         exportReceipt = new ArrayList<>();
     }
@@ -133,10 +130,10 @@ public class Warehouse implements FileInteraction {
         code = scanner.nextLine().trim().toUpperCase();
             if (Validate.testCode(code)) {
                 Product x = searchAProduct(code);
-                if (x == null) {
+                if (x != null) {
                     break;
                 } else {
-                    System.out.println("ID duplication! Try with another one.");
+                    System.out.println("Product ID does not exist");
                 }
             } else {
                 System.out.println("Code format is not correct, please input in the format DPXXXXXX or LSLXXXXXX (X: digit). Try again!");
@@ -161,7 +158,7 @@ public class Warehouse implements FileInteraction {
         return null;
     }
 
-    public void addImformation() {
+    public Receipt.ProductItem addImformation() {
         Scanner scanner = new Scanner(System.in);
         String itemCode;
         int quantity;
@@ -172,7 +169,7 @@ public class Warehouse implements FileInteraction {
         Confirmation confirm = null;
         while (true) {
             try {
-                System.out.println("Are you sure you want to add this item to your list?: ");
+                System.out.println("Are you sure you want to add this item to your receipt?: ");
                 confirm = Confirmation.valueOf(scanner.nextLine().toUpperCase());
                 break;
             } catch (Exception e) {
@@ -181,51 +178,56 @@ public class Warehouse implements FileInteraction {
         }
 
         if (confirm == Confirmation.YES) {
-            //import
+            Receipt.ProductItem productItem = new Receipt.ProductItem(itemCode, quantity);
             System.out.println("Add item successfully!");
+            return productItem;
         } else {
             System.out.println("Adding item failed!");
         }
+        return null;
     }
     
     public void importReceipt() {
         Receipt receipt = new Receipt();
-        ProductList productList = new ProductList();
-        Warehouse warehouse = new Warehouse(productList);
         String code = "I" + String.format("%06d", importReceipt.size());
         receipt.setCode(code);
         Scanner scanner = new Scanner(System.in);
         int choice;
-        addImformation();
+        Receipt.ProductItem productItem = addImformation();
+        if (productItem != null) receipt.getProducts().add(productItem);
 
         do {
             System.out.println("What do you want to do next?");
             System.out.println("1. Add more");
-            System.out.println("2. Exit!");
+            System.out.println("2. Confirm to add receipt to warehouse");
+            System.out.println("3. Exit!");
             while (true) {
                 try {
                     System.out.print("\nInput your choice: ");
                     choice = Integer.parseInt(scanner.nextLine());
-                    if (choice == 1 || choice == 2) {
+                    if (choice >= 1 && choice <= 3) {
                         break;
                     } else {
-                        System.out.println("\nPlease choose 1 or 2!");
+                        System.out.println("\nPlease choose 1,2 or 3!");
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("Please input your choice must be integer(1 or 2). Try again!");
+                    System.out.println("Please input your choice must be integer(1,2 or 3). Try again!");
                 }
             }
             switch (choice) {
                 case 1:
-                    addImformation();
+                    Receipt.ProductItem otherProductItem = addImformation();
+                    if (productItem != null) receipt.getProducts().add(otherProductItem);
                     break;
                 case 2:
+                    importReceipt.add(receipt);
+                    System.out.println("Add receipt to warehouse successfully. Go back main menu!");
+                    break;
+                case 3:
                     System.out.println("Go back main menu!");
                     break;
             }
-        } while (choice != 2);
-
-        
+        } while (choice != 2 && choice != 3);
     }
 
     public void exportReceipt() {

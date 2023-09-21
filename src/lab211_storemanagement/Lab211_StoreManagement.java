@@ -70,7 +70,7 @@ public class Lab211_StoreManagement {
         Scanner scanner = new Scanner(System.in);
         ProductList list = new ProductList();
         list.loadFromFile(Constant.PRODUCT_FILE_NAME);
-        Warehouse warehouse = new Warehouse();
+        Warehouse warehouse = new Warehouse(list);
         warehouse.loadFromFile(Constant.WAREHOUSE_FILE_NAME);
 
         do {
@@ -156,8 +156,8 @@ public class Lab211_StoreManagement {
                     break;
                             
                 case 2:
-//                    warehouse.displayAllReceipt();
                     warehouse.importReceipt();
+                    warehouse.displayAllReceipt();
                     break;
                 case 3:
                     while (true) {
