@@ -19,12 +19,14 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import util.Constant;
+import util.Validate;
 
 /**
  *
  * @author ADMIN
  */
 public class ProductList implements FileInteraction {
+
     private List<Product> products;
 
     public ProductList() {
@@ -101,7 +103,7 @@ public class ProductList implements FileInteraction {
         while (true) {
             System.out.println("Input code: ");
             code = scanner.nextLine().trim().toUpperCase();
-            if (Constant.testCodeDaily(code)) {
+            if (Validate.testCodeDaily(code)) {
                 Product x = searchAProduct(code);
                 if (x == null) {
                     break;
@@ -121,7 +123,7 @@ public class ProductList implements FileInteraction {
         while (true) {
             System.out.println("Input code: ");
             code = scanner.nextLine().trim().toUpperCase();
-            if (Constant.testCodeLsl(code)) {
+            if (Validate.testCodeLsl(code)) {
                 Product x = searchAProduct(code);
                 if (x == null) {
                     break;
@@ -139,7 +141,7 @@ public class ProductList implements FileInteraction {
         String name;
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input name: ");
-        name = scanner.nextLine().trim().toUpperCase();
+        name = scanner.nextLine().trim();
         return name;
 
     }
@@ -167,7 +169,7 @@ public class ProductList implements FileInteraction {
         return manufacturingDate;
     }
 
-    private LocalDate addExpirationDate() {
+    private LocalDate addExpirationDate(LocalDate manufacturingDate) {
         LocalDate expirationDate;
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -175,7 +177,6 @@ public class ProductList implements FileInteraction {
                 System.out.println("Input expiration date(dd/mm/yyyy): ");
                 String expirationDateStr = scanner.nextLine();
                 expirationDate = LocalDate.parse(expirationDateStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                LocalDate manufacturingDate = addManufacturingDate();
                 int daysLeft = expirationDate.compareTo(manufacturingDate);
                 if (daysLeft >= 0) {
                     break;
@@ -200,7 +201,7 @@ public class ProductList implements FileInteraction {
                 if (quantity > 0) {
                     break;
                 } else {
-                    System.out.println("Quantity is invalid. Year Of Work must be greater than 0.");
+                    System.out.println("Quantity is invalid. Quantity must be greater than 0.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println(" must be integer. Try again!");
@@ -239,7 +240,7 @@ public class ProductList implements FileInteraction {
         String productCode = addCodeDaily();
         String productName = addName();
         LocalDate manufacturingDate = addManufacturingDate();
-        LocalDate exporationDate = addExpirationDate();
+        LocalDate exporationDate = addExpirationDate(manufacturingDate);
         int quantity = addQuantity();
         String manufacturer = addManufacturer();
 
@@ -252,7 +253,7 @@ public class ProductList implements FileInteraction {
         String productCode = addCodeLsl();
         String productName = addName();
         LocalDate manufacturingDate = addManufacturingDate();
-        LocalDate exporationDate = addExpirationDate();
+        LocalDate exporationDate = addExpirationDate(manufacturingDate);
         int quantity = addQuantity();
         String manufacturer = addManufacturer();
 
@@ -273,7 +274,7 @@ public class ProductList implements FileInteraction {
             System.out.println("Information of product before updating.");
             System.out.println(x.toString());
             //Thông báo xác nhận
-            Confirmation confirmDelete = null;
+            Confirmation confirmDelete;
             while (true) {
                 try {
                     System.out.println("Do you want to update this product?[YES/NO]: ");
@@ -288,15 +289,15 @@ public class ProductList implements FileInteraction {
                 if (x instanceof DailyProduct) {
                     x.setProductName(addName());
                     x.setManufacturingDate(addManufacturingDate());
-                    x.setExpirationDate(addExpirationDate());
+                    x.setExpirationDate(addExpirationDate(x.getManufacturingDate()));
                     x.setQuantity(addQuantity());
                     x.setManufacturer(addManufacturer());
                 } else if (x instanceof LslProduct) {
                     x.setProductName(addName());
                     x.setManufacturingDate(addManufacturingDate());
-                    x.setExpirationDate(addExpirationDate());
+                    x.setExpirationDate(addExpirationDate(x.getManufacturingDate()));
                     x.setQuantity(addQuantity());
-//                x.setManufacturer(addManufacturer());
+                    x.setManufacturer(addManufacturer());
                 }
                 System.out.println("Update completed successfully.");
                 System.out.println("The information has been successfully updated:");
@@ -321,8 +322,8 @@ public class ProductList implements FileInteraction {
             System.out.println("PRODUCT FOUND!");
             System.out.println("Information of product before updating.");
             System.out.println(x.toString());
-            //Thông báo xác nhận
-            Confirmation confirmDelete = null;
+            
+            Confirmation confirmDelete;
             while (true) {
                 try {
                     System.out.println("Do you want to delete this product?[YES/NO]: ");
@@ -357,13 +358,17 @@ public class ProductList implements FileInteraction {
 
     public void displayDailyUseProducts() {
         products.forEach(product -> {
-            if(product instanceof DailyProduct) System.out.println("\t\t" + ((DailyProduct)product).toString());
+            if (product instanceof DailyProduct) {
+                System.out.println("\t\t" + ((DailyProduct) product).toString());
+            }
         });
     }
 
     public void displayLongShelfLifeProducts() {
-       products.forEach(product -> {
-            if(product instanceof LslProduct) System.out.println("\t\t" + ((LslProduct)product).toString());
+        products.forEach(product -> {
+            if (product instanceof LslProduct) {
+                System.out.println("\t\t" + ((LslProduct) product).toString());
+            }
         });
     }
 
@@ -377,11 +382,12 @@ public class ProductList implements FileInteraction {
             int daysLeft = currentDate.compareTo(products.get(i).getExpirationDate());
             if (daysLeft < 0) {
                 expiredProducts.add(products.get(i));
+            } else if (expiredProducts.isEmpty()) {
+                System.out.println("No products are expired!");
             }
         }
-
         for (Product expiredProduct : expiredProducts) {
-            System.out.println("\t\t" + expiredProduct.toString()); // Print each expired product
+            System.out.println("\t\t" + expiredProduct.toString());
         }
         return expiredProducts;
     }
@@ -394,6 +400,8 @@ public class ProductList implements FileInteraction {
             int daysLeft = currentDate.compareTo(products.get(i).getExpirationDate());
             if (daysLeft >= 0) {
                 sellingProducts.add(products.get(i));
+            } else if (sellingProducts.isEmpty()) {
+                System.out.println("No products are expired!");
             }
         }
 
@@ -440,7 +448,7 @@ public class ProductList implements FileInteraction {
         }
 
         for (Product outOfStockProduct : outOfStockProducts) {
-            System.out.println("\t\t" + outOfStockProducts.toString()); // 
+            System.out.println("\t\t" + outOfStockProduct.toString()); // 
         }
         return outOfStockProducts;
     }
@@ -460,5 +468,9 @@ public class ProductList implements FileInteraction {
             System.out.println(x.toString());
         }
     }
+    
+
+    
+            
 
 }

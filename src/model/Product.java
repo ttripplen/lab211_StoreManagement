@@ -27,6 +27,9 @@ public abstract class Product {
         this.productName = productName;
         this.manufacturingDate = manufacturingDate;
         this.expirationDate = expirationDate;
+        this.quantity = quantity;
+        this.manufacturer = manufacturer;
+        
     }
 
     public String getProductCode() {

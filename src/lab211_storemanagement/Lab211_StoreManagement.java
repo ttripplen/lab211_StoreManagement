@@ -11,6 +11,7 @@ import model.DailyProduct;
 import model.LslProduct;
 import model.Product;
 import model.ProductList;
+import model.Warehouse;
 import util.Constant;
 
 /**
@@ -69,6 +70,8 @@ public class Lab211_StoreManagement {
         Scanner scanner = new Scanner(System.in);
         ProductList list = new ProductList();
         list.loadFromFile(Constant.PRODUCT_FILE_NAME);
+        Warehouse warehouse = new Warehouse();
+        warehouse.loadFromFile(Constant.WAREHOUSE_FILE_NAME);
 
         do {
             printMenu();
@@ -151,8 +154,10 @@ public class Lab211_StoreManagement {
                             break;
                     }
                     break;
+                            
                 case 2:
-                    //
+//                    warehouse.displayAllReceipt();
+                    warehouse.importReceipt();
                     break;
                 case 3:
                     while (true) {
